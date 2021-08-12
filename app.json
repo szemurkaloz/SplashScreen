@@ -4,11 +4,12 @@
     "slug": "demo",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "",
     "splash": {
-      "image": "./assets/splash.png",
+      "image":
+        "./assets/doctors.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#2dd4bf"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
