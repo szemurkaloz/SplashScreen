@@ -3,7 +3,7 @@ import { Asset } from "expo-asset";
 import Constants from "expo-constants";
 import * as SplashScreen from "expo-splash-screen";
 import * as Updates from "expo-updates";
-import React, { useRef } from "react";
+import React, { useRef, useMemo, useEffect, useState } from "react";
 import {
   Animated,
   Button,
@@ -54,17 +54,24 @@ function AnimatedAppLoader({ children, image }) {
 }
 
 function AnimatedSplashScreen({ children, image }) {
-  const animation = React.useMemo(() => new Animated.Value(1), []);
+  const logoAnimation = useMemo(() => new Animated.Value(0));
   const moveAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [isAppReady, setAppReady] = React.useState(false);
-  const [isSplashAnimationComplete, setAnimationComplete] = React.useState(
+  const [isAppReady, setAppReady] = useState(false);
+  const [isSplashAnimationComplete, setAnimationComplete] = useState(
     false
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isAppReady) {
       Animated.sequence([
+      Animated.spring(logoAnimation, {
+        toValue: 1,
+        tension: 10,
+        friction: 2,
+        duration: 2000,
+        useNativeDriver: false,
+      }),
       Animated.timing(moveAnim, {
         duration: 2000,
         toValue: Dimensions.get('window').width / 1.6,
@@ -79,9 +86,9 @@ function AnimatedSplashScreen({ children, image }) {
       }),
     ]).start();
     Animated.timing(fadeAnim, {
-      duration: 2000,
+      duration: 3000,
       toValue: 1,
-      delay: 2000,
+      delay: 4000,
       useNativeDriver: false,
     }).start(() => setAnimationComplete(true));
     }
@@ -103,40 +110,63 @@ function AnimatedSplashScreen({ children, image }) {
     <>
       {isAppReady && children}
       {!isSplashAnimationComplete && (
-        <>
+        <Animated.View style={[
+          StyleSheet.absoluteFill,
+          {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: Constants.manifest.splash.backgroundColor,
+          },
+        ]}
+        >
         <Animated.View
           pointerEvents="none"
-          style={[
-            StyleSheet.absoluteFill,
+          style={
             {
-              backgroundColor: Constants.manifest.splash.backgroundColor,
-              opacity: animation,
-            },
-          ]}
+              top: logoAnimation.interpolate({
+                inputRange: [0,1],
+                outputRange: [80,0],
+              })
+            }
+          }
         >
           <Animated.Image
             style={{
-              width: "100%",
-              height: "100%",
-              resizeMode: Constants.manifest.splash.resizeMode || "contain",
-              transform: [
-                {
-                  scale: animation,
-                },
-              ],
+              width: 212,
+              height: 212,
             }}
             source={image}
             onLoadEnd={onImageLoaded}
             fadeDuration={0}
           />
         </Animated.View>
-        <Animated.View style={{flexDirection: 'row', marginLeft: moveAnim, marginBottom: 50}}>
-          <Text style={[styles.logoText]}></Text>
-          <Animated.Text style={[styles.logoText, {opacity: fadeAnim}]}>
-            Bejelentkezés
+        <Animated.View style={{ 
+            display: 'flex',
+            flexDirection: 'row', 
+            marginLeft: moveAnim
+          }}
+        >
+          <Text style={{
+            color: "black",
+            fontSize: 22,
+            fontWeight: "bold",
+          }}
+          >
+            B
+          </Text>
+          <Animated.Text style={{
+              color: "black",
+              fontSize: 22,
+              fontWeight: "bold",
+              height: 40,
+              opacity: fadeAnim,
+            }}>
+            ejelentkezés
           </Animated.Text>
+          
         </Animated.View>
-      </>
+      </Animated.View>
       )}
     </>
   );
@@ -155,7 +185,7 @@ function MainScreen() {
     <View
       style={{
         flex: 1,
-        backgroundColor: "plum",
+        backgroundColor: '#52b372',
         alignItems: "center",
         justifyContent: "center",
       }}
@@ -183,18 +213,17 @@ export const styles = StyleSheet.create({
   },
   logoText: {
     fontSize: 30,
-    marginTop: 20,
     color: 'black',
     fontWeight: '700',
-    height: 50,
+    height: 20,
   },
   contentContainer: {
     top: '40%',
     alignItems: 'center',
   },
   image: {
-    width: 250,
-    height: 200,
+    width: 150,
+    height: 100,
   },
   logoContainer: {
     flexDirection: 'row',
